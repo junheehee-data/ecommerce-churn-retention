@@ -74,3 +74,63 @@ model = xgb.XGBClassifier(
     random_state=42
 )
 model.fit(X_train, y_train)
+```
+
+### Top 5 Feature Importance
+1. **`Product Category_Clothing`** — **11.16%**
+2. **`Customer Age`** — **10.22%**
+3. **`Gender_Male`** — **9.86%**
+4. **`Payment Method_Credit Card`** — **9.25%**
+5. **`Returns (초기 반품 경험)`** — **9.20%**
+
+---
+
+## 5. CRM 액션 플랜 & A/B 테스트 프레임워크
+
+### Target Segment
+* **고위험군 조건:** `의류 카테고리 구매` + `현금/페이팔 결제` + `초기 반품(Returns=1) 경험`
+
+### Action Plan
+1. **반품 고객 케어:** 반품 완료 즉시 '맞춤 사이즈/핏 가이드' 알림톡 및 무료 교환 바우처 발송
+2. **결제 허들 완화:** 현금/페이팔 이용 고객 대상 '간편결제 등록 시 적립금 3,000원' 지급
+
+### A/B Test Design (Sandbox)
+* **대상:** 고위험 타깃군 12,000명 (50:50 Randomized Assignment)
+* **처치군 (Group A, 6,000명):** 맞춤형 케어 메시지 및 바우처 지급
+* **대조군 (Group B, 6,000명):** 기존 일반 메시지 발송 (Control)
+* **Primary Metric:** 30일 이내 재구매율 (Retention Rate)
+* **Guardrail Metric:** 마케팅 집행비 대비 영업이익률 (Profit Margin)
+
+---
+
+## 6. 재무적 성과 및 ROI 모델 (Incremental Uplift)
+
+매출 전체를 성과로 왜곡하는 오류를 차단하기 위해 **영업이익률(30%)**과 **대조군 대비 순수 증분(Incremental Uplift)** 지표를 반영한 ROI 수식을 설계했습니다.
+
+### Performance Valuation Formula
+$$\text{Incremental Profit} = \Big( N_{\text{target}} \times \Delta_{\text{uplift}} \times \text{AOV} \times \text{Margin Rate} \Big) - \text{Total Campaign Cost}$$
+
+$$\text{Real ROI (\%)} = \frac{\text{Incremental Profit}}{\text{Total Campaign Cost}} \times 100$$
+
+### Scenario Analysis (Target: 12,000명)
+
+| 항목 | Conservative Scenario | Target Scenario |
+| :--- | :---: | :---: |
+| **Target Population ($N_{\text{target}}$)** | 12,000명 | 12,000명 |
+| **Incremental Uplift ($\Delta_{\text{uplift}}$)** | **+4.0%p** (처치 24% vs 대조 20%) | **+6.0%p** (처치 26% vs 대조 20%) |
+| **Average Order Value (AOV)** | 268,000원 | 268,000원 |
+| **Margin Rate** | **30%** | **30%** |
+| **Campaign Cost** | 18,000,000원 | 18,000,000원 |
+| **Incremental Profit** | **20,592,000원** | **39,888,000원** |
+| **Net ROI (%)** | **114.4%** | **221.6%** |
+
+---
+
+## 7. 리스크 검토 및 FAQ
+
+* **Q1. 결제 수단별 이탈률 차이(0.59%p)의 비즈니스적 유의미성**
+  * **A:** 24만 건 이상의 대용량 샘플에서 카이제곱 검증 결과 $p = 0.0026$으로 통계적 유의성이 명확히 검증되었습니다. 이는 단순 오차가 아닌 결제 UX 상의 허들이 실질적 이탈을 유발함을 의미합니다.
+* **Q2. 의류 카테고리의 이탈 중요도 1위에 대한 전략적 해석**
+  * **A:** 의류는 품목 특성상 사이즈 및 재질 불만족으로 인한 반품률이 높아 이탈의 촉매로 작동합니다. 의류 판매 축소가 아닌, 교환 프로세스 개선 및 핏 가이드 제공을 통해 2차 이탈을 차단하는 접근이 타당합니다.
+* **Q3. ROI 산출 모델의 신뢰성 보장 방안**
+  * **A:** 매출(Gross Revenue)이 아닌 영업이익률(30%)을 기준으로 계산하였으며, 자연 유지(Organic Retention) 수치를 제외한 A/B 테스트 순수 증분(Incremental Uplift)만을 성과로 인정하여 재무적 리스크를 최소화했습니다.
